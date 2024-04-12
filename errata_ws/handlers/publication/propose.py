@@ -105,6 +105,8 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 # Make available downstream.
                 self.issue_created_by = entities[0].created_by
                 self.issue_uid = entities[0].uid
+                self.issue_institute = entities[0].institute
+
 
 
         def _notify():
@@ -121,7 +123,9 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 self.request.protocol,
                 self.request.host,
                 self.issue_created_by,
-                self.issue_uid
+                self.issue_uid,
+                self.issue_institute
+
             )
 
 

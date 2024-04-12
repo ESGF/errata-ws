@@ -4,7 +4,7 @@ from email.MIMEText import MIMEText
 
 from errata_ws.notifications import constants
 from errata_ws.notifications import templates
-
+from errata_ws.utils import contacts
 
 def dispatch_on_accepted(http_protocol, web_host, address_of_proposer, errata_uid):
 	"""Dispatches an email upon acceptance of an errata by a moderator.
@@ -38,7 +38,7 @@ def dispatch_on_proposed_1(http_protocol, web_host, address_of_proposer, errata_
 	_dispatch(msg)
 
 
-def dispatch_on_proposed_2(http_protocol, web_host, address_of_proposer, errata_uid):
+def dispatch_on_proposed_2(http_protocol, web_host, address_of_proposer, errata_uid, institute):
 	"""Dispatches an email upon proposal of an errata by an anonymous user.
 	
 	:param http_protocol: HTTP protocol of web-service serving errata content.
@@ -47,12 +47,22 @@ def dispatch_on_proposed_2(http_protocol, web_host, address_of_proposer, errata_
 	:param errata_uid: Unique identifier of errata being processed.
 
 	"""
+	# duplicate notification with core moderation mailing list.
 	body = templates.get_on_proposed_email_body_2(http_protocol, web_host, address_of_proposer, errata_uid)
 	subject = constants.ON_ERRATA_PROPOSED_EMAIL_SUBJECT
-	msg = _get_message(constants.ADDRESS_MODERATION, body, subject)
-
+	# send an email to the default mailing list
+	msg = _get_message(contacts["default"], body, subject)
 	_dispatch(msg)
-	
+	# get institute specific email address from config if exists send another email
+	try:
+		emails = contacts[institute]
+		if emails:
+			for e in emails:
+				msg = _get_message(e, body, subject)
+				_dispatch(msg)
+	except Exception as e:
+		pass    
+
 
 def dispatch_on_rejected(http_protocol, web_host, address_of_proposer, errata_uid):
 	"""Dispatches an email upon rejection of an errata by a moderator.

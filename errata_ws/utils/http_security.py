@@ -94,6 +94,7 @@ def authorize_moderation(user_id, project_id, institute_id):
     """
     # User must be a member of errata-moderation team.
     logger.log_web('Authorizing: {} --> {}'.format(user_id, _GH_TEAM_MODERATION))
+    logger.log_web('HERE')
     security.authorize_user(_GH_TEAM_MODERATION, user_id)
 
 

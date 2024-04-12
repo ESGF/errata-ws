@@ -8,9 +8,10 @@ from errata_ws.utils.convertor import json_file_to_namedtuple
 
 # Default configuration file path.
 _CONFIG_FPATH = "ws.conf"
-
+_CONTACTS = "contacts.json"
 # Configuration data.
 data = None
+contacts = None
 
 
 def _get_config_fpath(config_path):
@@ -29,20 +30,39 @@ def _get_config_fpath(config_path):
     raise RuntimeError(err)
 
 
+def _get_contacts():
+    """Returns configuration file path.
+
+    """
+    dpath = os.path.dirname(os.path.abspath(__file__))
+    while dpath != '/':
+        fpath = os.path.join(dpath, "ops/config")
+        fpath = os.path.join(fpath, _CONTACTS)
+        if os.path.exists(fpath):
+            with open(fpath, "r") as file:
+                contact_data = json.load(file)
+            return contact_data
+        dpath = os.path.dirname(dpath)
+    err = "ESDOC-ERRATA contacts file ({0}) could not be found".format(_CONTACTS)
+    raise RuntimeError(err)
+
+
 def _init():
     """Initializes configuration.
 
     """
     global data
+    global contacts
 
     # Get configuration file path (falling back to template if necessary).
-    fpath = _get_config_fpath('ws.conf')
+    fpath = _get_config_fpath(_CONFIG_FPATH)
 
     # Convert config file to a named tuple.
     data = json_file_to_namedtuple(fpath)
-
+    contacts = _get_contacts()
     logger.log_web("Configuration file loaded @ {}".format(fpath))
 
 
 # Auto-initialize.
 _init()
+
