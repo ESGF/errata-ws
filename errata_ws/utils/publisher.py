@@ -3,7 +3,6 @@ import pyessv
 import datetime as dt
 
 from errata_ws.utils.constants import *
-from errata_ws.utils.facet_extractor import extract_facets
 from errata_ws.db.models import Issue
 from errata_ws.db.models import IssueFacet
 from errata_ws.db.models import IssueResource
