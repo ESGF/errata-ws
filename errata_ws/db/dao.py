@@ -4,7 +4,6 @@ from errata_ws.db.dao_validator import validate_delete_facets
 from errata_ws.db.dao_validator import validate_delete_resources
 from errata_ws.db.dao_validator import validate_get_datasets
 from errata_ws.db.dao_validator import validate_get_issue
-from errata_ws.db.dao_validator import validate_get_issues
 from errata_ws.db.dao_validator import validate_get_resources
 from errata_ws.db.models import Issue
 from errata_ws.db.models import IssueFacet
@@ -110,7 +109,6 @@ def get_descriptions():
     return [(x[0], x[1])for x in qry.all()]
 
 
-@validate(validate_get_issues)
 def get_issues(criteria, exclude_in_moderation=True):
     """Returns collection of matching issues.
 
