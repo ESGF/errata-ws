@@ -25,10 +25,10 @@ def _get_formatted_message(msg, module, level):
         return _NULL_MSG
 
     return "{} [{}] :: ES-DOC > {} : {}".format(
-        unicode(arrow.get())[0:-13],
+        str(arrow.get())[0:-13],
         level,
         module,
-        unicode(msg).strip()
+        str(msg).strip()
         )
 
 

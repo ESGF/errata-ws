@@ -1,10 +1,10 @@
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from errata_ws.notifications import constants
 from errata_ws.notifications import templates
-from errata_ws.utils import contacts
+# from errata_ws.utils import contacts
 
 def dispatch_on_accepted(http_protocol, web_host, address_of_proposer, errata_uid):
 	"""Dispatches an email upon acceptance of an errata by a moderator.
