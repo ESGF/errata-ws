@@ -139,9 +139,9 @@ def validate_unicode(val, var):
         raise ValueError('{0} is undefined unicode'.format(var))
 
     try:
-        val = unicode(val)
+        val = str(val)
     except ValueError:
-        _raise_value_error(val, var, unicode)
+        _raise_value_error(val, var, str)
 
     if not len(val):
         raise ValueError('{0} is empty unicode'.format(var))

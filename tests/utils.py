@@ -36,7 +36,7 @@ def assert_ws_response(
     assert response.status_code == status_code, response.status_code
 
     # WS response = unicode.
-    assert isinstance(response.text, unicode)
+    assert isinstance(response.text, str)
 
     # WS response has no cookies.
     assert len(response.cookies) == 0
@@ -153,7 +153,7 @@ def get_unicode(length):
     """Returns a random unicode for testing purposes.
 
     """
-    return unicode(uuid.uuid1())[:length]
+    return str(uuid.uuid1())[:length]
 
 
 def get_uuid():
@@ -311,8 +311,8 @@ def assert_unicode(actual, expected):
     :type expected: str
 
     """
-    assert_object(actual, unicode)
-    assert_object(expected, unicode)
+    assert_object(actual, str)
+    assert_object(expected, str)
     assert actual == expected, \
            "Unicode mismatch : actual = {0} :: expected = {1}" \
            .format(actual, expected)

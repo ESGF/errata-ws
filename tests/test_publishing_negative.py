@@ -142,13 +142,13 @@ def _callback_06(issue, _):
 
 def _callback_07(issue, _):
     """Set issue uid so that update will fail."""
-    issue['uid'] = unicode(uuid.uuid4())
+    issue['uid'] = str(uuid.uuid4())
 
 
 def _callback_08(issue, field):
     """Set immutable field."""
     if field == 'title':
-        issue['title'] = unicode(uuid.uuid4())
+        issue['title'] = str(uuid.uuid4())
     elif field == 'project':
         project = issue['project']
         while project == issue['project']:
