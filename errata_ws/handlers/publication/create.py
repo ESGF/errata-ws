@@ -1,7 +1,5 @@
 import re
-from difflib import SequenceMatcher
 
-import pyessv
 import tornado
 
 from errata_ws import db
@@ -13,8 +11,7 @@ from errata_ws.utils.http import process_request
 from errata_ws.utils.http_security import authorize
 from errata_ws.utils.publisher import get_entities_on_errata_create
 from errata_ws.utils.publisher import get_institute
-from errata_ws.utils.publisher import get_institutes
-from errata_ws.utils.validation import validate_url
+from errata_ws.utils.validation import validate_url, validate_dataset_id
 
 
 class CreateErrataRequestHandler(tornado.web.RequestHandler):
@@ -45,22 +42,16 @@ class CreateErrataRequestHandler(tornado.web.RequestHandler):
             """Validates datasets associated with incoming issue.
 
             """
-            sanitzed_datasets = [dset.strip().encode('ascii', 'ignore').decode('ascii')
+            sanitized_datasets = [dset.strip().encode('ascii', 'ignore').decode('ascii')
                                  for dset in self.request.data[constants.JF_DATASETS]]
-            if sanitzed_datasets is None or len(sanitzed_datasets) == 0:
+            if sanitized_datasets is None or len(sanitized_datasets) == 0:
                 raise exceptions.EmptyDatasetList()
 
-            for dset in sanitzed_datasets:
+            for dset in sanitized_datasets:
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            try:
-                pyessv.parse_dataset_identifers(
-                    self.request.data[constants.JF_PROJECT],
-                    sanitzed_datasets
-                )
-            except pyessv.TemplateParsingError:
-                raise exceptions.InvalidDatasetIdentifierError(self.request.data[constants.JF_PROJECT])
+            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
 
 
         def _validate_user_access():

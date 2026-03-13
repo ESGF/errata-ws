@@ -1,10 +1,10 @@
-import pyessv
+import esgvoc.api as ev
 import tornado
 
 from errata_ws import db
 from errata_ws.utils import http_security
 from errata_ws.utils.http import process_request
-
+from errata_ws.utils.mapper import map_collection
 
 
 class SearchErrataSetupRequestHandler(tornado.web.RequestHandler):
@@ -33,53 +33,21 @@ class SearchErrataSetupRequestHandler(tornado.web.RequestHandler):
                 'esdoc:errata:status',
                 'esdoc:errata:moderation-status'
             }
-            for project in pyessv.load('esdoc:errata:project'):
-                for vocab in project.data['facets']:
-                    vocabs.add(vocab)
+
+            for project in ev.get_all_projects():
+                collections = ev.get_all_collections_in_project(project)
+                for collection in collections:
+                    vocabs.add(f"wcrp:{project}:{collection}")
 
             # Get facet values.
             with db.session.create():
-                facet_values = set(db.dao.get_project_facets())                
+                facet_values = list(set(db.dao.get_project_facets()))
 
             # Set output.
             self.output = {
-                'vocabs': [_map_collection(i) for i in sorted(vocabs)],
+                'vocabs': [map_collection(i) for i in sorted(vocabs)],
                 'values': facet_values
             }
 
         # Process request.
         process_request(self, _set_output)
-
-
-def _map_collection(identifier):
-    """Converts a pyessv collection to a dictionary.
-
-    """
-    collection = pyessv.load(identifier)
-
-    result = {
-        'canonical_name': collection.canonical_name,
-        'key': collection.namespace,
-        'label': collection.label,
-        'namespace': collection.namespace,
-        'terms': [_map_term(i) for i in collection]
-    }
-    if collection.data is not None:
-        result.update(collection.data)
-
-    return result
-
-
-def _map_term(term):
-    """Converts a pyessv term to a dictionary.
-
-    """
-    result = {
-        'canonical_name': term.canonical_name,
-        'key': term.namespace,
-        'label': term.label,
-        'namespace': term.namespace
-    }
-    result.update(term.data)
-
-    return result

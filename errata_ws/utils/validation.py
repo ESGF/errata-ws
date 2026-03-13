@@ -2,11 +2,11 @@ import uuid
 
 import arrow
 import requests
-import pyessv
 
 from errata_ws.utils import config
 from errata_ws.utils import exceptions
 
+from esgvoc.apps.drs.validator import DrsValidator
 
 
 def validate(validator):
@@ -51,15 +51,6 @@ def validate_enum(enum_values, val, var):
         _raise_value_error(val, var, 'enum-member')
 
 
-def validate_pyessv_enum(collection_id, val, var):
-    """Validates an enumerable member.
-
-    """
-    namespace = '{}:{}'.format(collection_id, val)
-    try:
-        pyessv.parse(namespace)
-    except pyessv.ParsingError:
-        _raise_value_error(val, var, 'enum-member')
 
 
 def validate_int(val, var):
@@ -182,3 +173,17 @@ def validate_url(url):
             return
 
     raise exceptions.InvalidURLError(url)
+
+
+def validate_dataset_id(project: str, dataset_id: str) -> dict[str, str | list | dict[str, str]]:
+    """
+    Validate a dataset_id based on a project's DRS with esgvoc, then return its facets if valid, raise an error otherwise
+    """
+    try:
+        validator = DrsValidator(project_id=project)
+        validated_terms = validator.validate_dataset_id(drs_expression=dataset_id)        
+        assert not validated_terms.errors
+
+        return validated_terms.model_dump()
+    except AssertionError:
+        raise exceptions.InvalidDatasetIdentifierError(dataset_id)

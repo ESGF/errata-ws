@@ -1,11 +1,8 @@
 import re
-from difflib import SequenceMatcher
 
-import pyessv
 import tornado
 
 from errata_ws import db
-from errata_ws import notifications
 from errata_ws.utils import config
 from errata_ws.utils import constants
 from errata_ws.utils import exceptions
@@ -14,7 +11,7 @@ from errata_ws.utils.http import process_request
 from errata_ws.utils.publisher import get_institute
 from errata_ws.utils.publisher import get_entities_on_errata_update
 from errata_ws.utils.http_security import authorize
-from errata_ws.utils.validation import validate_url
+from errata_ws.utils.validation import validate_url, validate_dataset_id
 
 
 class UpdateErrataRequestHandler(tornado.web.RequestHandler):
@@ -53,13 +50,8 @@ class UpdateErrataRequestHandler(tornado.web.RequestHandler):
                 for dset in sanitized_datasets:
                     if re.search(constants.VERSION_REGEX, dset) is None:
                         raise exceptions.MissingVersionNumber(dset)
-            try:
-                pyessv.parse_dataset_identifers(
-                    self.request.data[constants.JF_PROJECT],
-                    sanitized_datasets
-                    )
-            except pyessv.TemplateParsingError:
-                raise exceptions.InvalidDatasetIdentifierError(self.request.data[constants.JF_PROJECT])
+            
+            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
 
 
         def _validate_user_access():
