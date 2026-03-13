@@ -210,7 +210,7 @@ def _write_success(handler):
     try:
         data = handler.output
     except AttributeError:
-        data = unicode()
+        data = str()
         encoding = None
 
     # Write respponse.

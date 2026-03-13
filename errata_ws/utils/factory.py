@@ -29,13 +29,13 @@ def create_issue_dict():
 
     return {
         JF_DATASETS: get_datasets(project_id),
-        JF_DESCRIPTION: unicode(uuid.uuid4()),
+        JF_DESCRIPTION: str(uuid.uuid4()),
         JF_MATERIALS: _get_materials(),
         JF_PROJECT: project_id,
         JF_SEVERITY: pyessv.load_random('esdoc:errata:severity'),
         JF_STATUS: ISSUE_STATUS_NEW,
-        JF_TITLE: unicode(uuid.uuid4()),
-        JF_UID: unicode(uuid.uuid4()),
+        JF_TITLE: str(uuid.uuid4()),
+        JF_UID: str(uuid.uuid4()),
         JF_URLS: ['https://es-doc.org/cmip6-dataset-errata']
     }
 
