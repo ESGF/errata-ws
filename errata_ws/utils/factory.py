@@ -1,59 +1,56 @@
-import datetime as dt
+import random
+import datetime
 import uuid
 
-import pyessv
+import esgvoc.api as ev
+from esgvoc.api.project_specs import DrsType
+from esgvoc.apps.drs.generator import DrsGenerator
 
 from errata_ws.utils.constants import *
 
+from resources.mappers import metadata_mapper
 
 
 # Global now.
-_NOW = dt.datetime.utcnow()
+_NOW = datetime.datetime.now(datetime.timezone.utc)
 
 # Collection of materials, i.e. supporting images, graphs ... etc.
 _MATERIALS = []
-
-# Collection of data set patters used when generating test dataset identifiers.
-_DATASETS_PATTERNS = {
-    'cmip5': u'cmip5.{}.{}.{}.{}.{}.{}.{}.r1i1p1#20180101',
-    'cmip6': u'CMIP6.{}.{}.{}.{}.r1i1p1f1.{}.Emon.{}#20180101',
-    'cordex': u'cordex.{}.{}.{}.{}.{}.r12i1p1.{}.v1.{}.{}#20180101'
-}
 
 
 def create_issue_dict():
     """Returns a test issue (dictionary encoding).
 
     """
-    project_id = pyessv.load_random('esdoc:errata:project')
+    projects = ev.get_all_projects()
+    project = random.choice(projects)
 
     return {
-        JF_DATASETS: get_datasets(project_id),
+        JF_DATASETS: get_dataset_ids(project),
         JF_DESCRIPTION: str(uuid.uuid4()),
-        JF_MATERIALS: _get_materials(),
-        JF_PROJECT: project_id,
-        JF_SEVERITY: pyessv.load_random('esdoc:errata:severity'),
+        JF_MATERIALS: get_materials(),
+        JF_PROJECT: project,
+        JF_SEVERITY: random.choice(metadata_mapper["severity"]["terms"])["canonical_name"],
         JF_STATUS: ISSUE_STATUS_NEW,
         JF_TITLE: str(uuid.uuid4()),
         JF_UID: str(uuid.uuid4()),
-        JF_URLS: ['https://es-doc.org/cmip6-dataset-errata']
+        JF_URLS: ['https://www.google.com/']
     }
 
 
-def _get_materials():
+def get_materials():
     """Returns test affected  datasets.
 
     """
     return [
-        'https://test-errata.es-doc.org/media/img/materials/material-01.png',
-        'https://test-errata.es-doc.org/media/img/materials/material-02.png',
-        'https://test-errata.es-doc.org/media/img/materials/material-03.png',
-        'https://test-errata.es-doc.org/media/img/materials/material-04.png',
-        'https://test-errata.es-doc.org/media/img/materials/material-05.png'
+        'https://www.ornithomedia.com/wp-content/uploads/2025/12/news031225-kakapo.jpg',
+        'https://rodmaps.com/wp-content/uploads/2024/10/Sejour-de-peche-grosse-truite-en-Espagne.jpg',
+        'https://live.staticflickr.com/5027/5568162083_02ec8a29f6_b.jpg',
+        'https://anasazivet.com/wp-content/uploads/2019/09/pets-4415649_1920.jpg'
     ]
 
 
-def get_datasets(project, existing=[]):
+def get_dataset_ids(project, existing=[]):
     """Returns a collection of test dataset identifiers.
 
     :param str project: Project code.
@@ -63,44 +60,35 @@ def get_datasets(project, existing=[]):
     :rtype: list
 
     """
-    return [_get_dataset(project) for i in range(5)] + existing
+    return [get_dataset_id(project) for i in range(5)] + existing
 
 
-def _get_dataset(project):
+def get_dataset_id(project):
     """Returns a dataset identifier.
 
     """
-    pattern = _DATASETS_PATTERNS[project]
+    generator = DrsGenerator(project_id=project)
+    drs_mapping = {}
+    project_specs = ev.get_project(project)
 
-    if project == 'cmip5':
-        return pattern.format(
-            pyessv.load_random('wcrp:cmip5:product', field='raw_name'),
-            pyessv.parse('wcrp:cmip5:institute:ipsl', field='raw_name'),
-            pyessv.load_random('wcrp:cmip5:model', field='raw_name'),
-            pyessv.load_random('wcrp:cmip5:experiment', field='raw_name'),
-            pyessv.load_random('wcrp:cmip5:time-frequency', field='raw_name'),
-            pyessv.load_random('wcrp:cmip5:realm', field='raw_name'),
-            pyessv.load_random('wcrp:cmip5:cmor-table', field='raw_name')
-            )
-
-    elif project == 'cmip6':
-        return pattern.format(
-            pyessv.load_random('wcrp:cmip6:activity-id', field='raw_name'),
-            pyessv.parse('wcrp:cmip6:institution-id:ipsl', field='raw_name'),
-            pyessv.load_random('wcrp:cmip6:source-id', field='raw_name'),
-            pyessv.load_random('wcrp:cmip6:experiment-id', field='raw_name'),
-            pyessv.load_random('wcrp:cmip6:table-id', field='raw_name'),
-            pyessv.load_random('wcrp:cmip6:grid-label', field='raw_name')
-            )
-
-    elif project == 'cordex':
-        return pattern.format(
-            pyessv.load_random('wcrp:cordex:product', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:domain', field='raw_name'),
-            pyessv.parse('wcrp:cordex:institute:ipsl-ineris', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:driving-model', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:experiment', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:rcm-name', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:time-frequency', field='raw_name'),
-            pyessv.load_random('wcrp:cordex:variable', field='raw_name')
-            )
+    if project_specs:
+        drs_specs = project_specs.drs_specs
+        if drs_specs:
+            for part in drs_specs[DrsType.DATASET_ID].parts:
+                collection = part.source_collection
+                if collection in ["member_id", "variant_label", "driving_variant_label"]:
+                    drs_mapping[collection] = "r1i1p1f1"
+                elif collection == "version_realization":
+                    if project == "cordex-cmip6":
+                        drs_mapping[collection] = "v1-r1"
+                    else:
+                        drs_mapping[collection] = "v1"
+                elif collection == "branding_suffix":
+                    drs_mapping[collection] = random.choice(ev.get_all_terms_in_collection(project, "branded_variable")).branding_suffix_name
+                elif collection in ["directory_date", "version"]:
+                    drs_mapping[collection] = "v20230512"
+                else:
+                    random_term = random.choice(ev.get_all_terms_in_collection(project, collection))
+                    drs_mapping[collection] = random_term.drs_name
+    
+    return f"{generator.generate_dataset_id_from_mapping(mapping=drs_mapping).generated_drs_expression}#20190704"
