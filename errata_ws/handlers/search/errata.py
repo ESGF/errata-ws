@@ -29,7 +29,10 @@ class SearchErrataRequestHandler(tornado.web.RequestHandler):
             """Sets search criteria.
 
             """
-            self.criteria = self.get_argument(_PARAM_CRITERIA).split(',')
+            self.criteria = {
+                key: self.get_argument(key)
+                for key in self.request.arguments
+            }
 
 
         def _set_data():
@@ -37,7 +40,22 @@ class SearchErrataRequestHandler(tornado.web.RequestHandler):
 
             """
             with db.session.create():
-                self.issues = db.dao.get_issues(self.criteria, True)
+                rows = db.dao.get_issues(self.criteria, True)
+                # Convert rows to dictionaries, ensuring all fields are included
+                self.issues = [
+                    {
+                        'project': row[0],
+                        'institute': row[1],
+                        'uid': row[2],
+                        'title': row[3],
+                        'severity': row[4],
+                        'status': row[5],
+                        'dateCreated': row[6],
+                        'dateUpdated': row[7],
+                        'moderationStatus': row[9]
+                    }
+                    for row in rows
+                ]
                 self.total = db.utils.get_count(db.models.Issue)
 
 
