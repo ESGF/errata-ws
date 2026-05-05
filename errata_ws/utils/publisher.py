@@ -11,7 +11,7 @@ from errata_ws.db.models import IssueResource
 from errata_ws.db.models import PIDServiceTask
 from errata_ws.utils.validation import validate_dataset_id
 
-from resources.esdoc_map import esdoc_map
+from resources.mappers import metadata_mapper
 
 
 def get_entities_on_errata_create(obj, user_id, user_role):
@@ -174,7 +174,7 @@ def _get_facets(issue, obj):
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
-        facet.facet_type = u'esdoc:errata:{}'.format(facet_type)
+        facet.facet_type = facet_type
         if facet_type == FACET_TYPE_MODERATION_STATUS:
             facet.facet_value = issue.moderation_status.lower()
         else:
@@ -198,7 +198,7 @@ def _get_pid_tasks(issue, obj):
 
     """
     pid_tasks = []
-    project_terms = esdoc_map['esdoc:errata:project']['terms']
+    project_terms = metadata_mapper["project"]['terms']
 
     for term in project_terms:
         if term['canonical_name'] == issue.project:

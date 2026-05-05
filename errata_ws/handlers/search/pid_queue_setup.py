@@ -26,9 +26,9 @@ class PIDQueueSearchSetupRequestHandler(tornado.web.RequestHandler):
             """
             # Set vocabs to be loaded.
             vocabs = [
-                'esdoc:errata:project',
-                'esdoc:errata:pid-task-action',
-                'esdoc:errata:pid-task-status'
+                'project',
+                'pid-task-action',
+                'pid-task-status'
             ]
 
             # Set output.
