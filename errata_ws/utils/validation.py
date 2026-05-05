@@ -181,7 +181,7 @@ def validate_dataset_id(project: str, dataset_id: str) -> dict[str, str | list |
     """
     try:
         validator = DrsValidator(project_id=project)
-        validated_terms = validator.validate_dataset_id(drs_expression=dataset_id)        
+        validated_terms = validator.validate_dataset_id(drs_expression=dataset_id)
         assert not validated_terms.errors
 
         return validated_terms.model_dump()
