@@ -23,5 +23,5 @@ errata/TODO.txt
 errata.egg-info
 errata-ws.conf
 errata-supervisord.conf
-/ops
+errata_ws/ops/*
 *.lock
