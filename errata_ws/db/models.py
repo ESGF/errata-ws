@@ -1,6 +1,7 @@
 import collections
 import datetime as dt
 import uuid
+from collections import defaultdict
 
 from sqlalchemy import func
 from sqlalchemy import Column
@@ -25,7 +26,7 @@ _SCHEMA = 'errata'
 # Issue status enumeration.
 _ISSUE_MODERATION_ENUM = Enum(
     ISSUE_MODERATION_ACCEPTED,
-    ISSUE_MODERATION_IN_REVIEW.decode(),
+    ISSUE_MODERATION_IN_REVIEW,
     ISSUE_MODERATION_NOT_REQUIRED,
     ISSUE_MODERATION_REJECTED,
     schema=_SCHEMA,
@@ -125,7 +126,13 @@ class Issue(Entity):
 
         """
         def _get_facets():
-            return sorted(['{}:{}'.format(i.facet_type, i.facet_value) for i in facets if i.issue_uid == self.uid])
+            result = defaultdict(list)
+
+            for i in facets:
+                if i.issue_uid == self.uid:
+                    result[i.facet_type] = i.facet_value
+
+            return dict(result)
 
         def _get_reources(resource_type):
             return sorted([i.resource_location for i in resources \
