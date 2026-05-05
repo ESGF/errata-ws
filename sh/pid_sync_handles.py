@@ -61,12 +61,12 @@ def _sync(pid_connection, task):
     # ... managed exceptions
     except exceptions.HandleMismatch as err:
         logger.log_pid_warning(err)
-        return constants.PID_TASK_STATE_ERROR, unicode(err)[:1023]
+        return constants.PID_TASK_STATE_ERROR, str(err)[:1023]
 
     # ... unmanaged exceptions
     except Exception as err:
         logger.log_pid_error(err)
-        return constants.PID_TASK_STATE_ERROR, unicode(err)[:1023]
+        return constants.PID_TASK_STATE_ERROR, str(err)[:1023]
 
     return constants.PID_TASK_STATE_COMPLETE, None
 

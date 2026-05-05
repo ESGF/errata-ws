@@ -1,6 +1,5 @@
 import re
 
-import pyessv
 import tornado
 
 from errata_ws import db
@@ -10,7 +9,7 @@ from errata_ws.utils import exceptions
 from errata_ws.utils import http_security
 from errata_ws.utils.http import process_request
 from errata_ws.utils.publisher import get_entities_on_errata_propose
-from errata_ws.utils.validation import validate_url
+from errata_ws.utils.validation import validate_url, validate_dataset_id
 
 
 class ProposeErrataRequestHandler(tornado.web.RequestHandler):
@@ -42,26 +41,20 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
 
             """
             # Exception if no usable dataset identifiers.
-            dsets_sanitized = [
+            sanitized_datasets = [
                 dset.encode('ascii', 'ignore').decode('ascii')
                 for dset in self.request.data[constants.JF_DATASETS]
                 ]
-            if dsets_sanitized is None or len(dsets_sanitized) == 0:
+            if sanitized_datasets is None or len(sanitized_datasets) == 0:
                 raise exceptions.EmptyDatasetList()
 
             # Exception if dataset version is missing.
-            for dset in dsets_sanitized:
+            for dset in sanitized_datasets:
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            # Exception if pyessv dataset parsing fails.
-            try:
-                pyessv.parse_dataset_identifers(
-                    self.request.data[constants.JF_PROJECT],
-                    dsets_sanitized
-                )
-            except pyessv.TemplateParsingError:
-                raise exceptions.InvalidDatasetIdentifierError(self.request.data[constants.JF_PROJECT])
+            # Exception if esgvoc dataset parsing fails.
+            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
 
 
         def _validate_issue_title():

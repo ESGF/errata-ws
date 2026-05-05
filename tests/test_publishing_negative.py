@@ -1,11 +1,10 @@
 import json
-import urllib
 import uuid
 
 import requests
+import random
 
-import pyessv
-from pyessv._utils.compat import basestring
+import esgvoc.api as ev
 from errata_ws.utils import factory
 from errata_ws.utils.constants import *
 from tests import utils as tu
@@ -142,17 +141,18 @@ def _callback_06(issue, _):
 
 def _callback_07(issue, _):
     """Set issue uid so that update will fail."""
-    issue['uid'] = unicode(uuid.uuid4())
+    issue['uid'] = str(uuid.uuid4())
 
 
 def _callback_08(issue, field):
     """Set immutable field."""
     if field == 'title':
-        issue['title'] = unicode(uuid.uuid4())
+        issue['title'] = str(uuid.uuid4())
     elif field == 'project':
         project = issue['project']
         while project == issue['project']:
-            issue['project'] = pyessv.load_random('esdoc:errata:project')
+            projects = ev.get_all_projects()
+            issue['project'] = random.choice(projects)
 
 
 def _callback_09(issue, _):
@@ -194,6 +194,6 @@ def _assert_bad_ws_response(response):
     # WS JSON response.
     obj = json.loads(response.text)
     assert isinstance(obj, dict)
-    for field, test_type in {('errorCode', int), ('errorMessage', basestring), ('errorType', basestring), ('errorField', basestring)}:
+    for field, test_type in {('errorCode', int), ('errorMessage', str), ('errorType', str), ('errorField', str)}:
         assert field in obj
         assert isinstance(obj[field], test_type), "{}:{}".format(obj[field], field)

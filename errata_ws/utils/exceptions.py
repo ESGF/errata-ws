@@ -159,6 +159,20 @@ class TitleExistsError(RequestValidationException):
         super(TitleExistsError, self).__init__(msg)
 
 
+class CollectionNotFoundInProject(RequestValidationException):
+    """Raised if no requested collection was found in the selected project.
+
+    """
+    def __init__(self, project, collection):
+        """Instance constructor.
+
+        """
+        self.field = project
+        self.collection = collection
+        msg = 'No collection was found in the project'
+        super(CollectionNotFoundInProject, self).__init__(msg)
+
+
 # Map of managed error codes.
 ERROR_CODES = {
     InvalidJSONError: 900,

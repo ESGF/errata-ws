@@ -1,11 +1,7 @@
 import tornado
 
-import pyessv
-import errata_ws
-from errata_ws.utils import config
+from errata_ws.utils.validation import validate_dataset_id
 from errata_ws.utils.http import process_request
-from errata_ws.utils.http_security import apply_policy
-
 
 
 # Query parameter names.
@@ -22,13 +18,11 @@ class ValidateDatasetIdentifierRequestHandler(tornado.web.RequestHandler):
 
         """
         def _validate():
-            """Validates dataset identifer using pyessv.
-
             """
-            pyessv.parse_dataset_identifer(
-                self.get_argument(_PARAM_PROJECT),
-                self.get_argument(_PARAM_IDENTIFIER)
-                )
+            Validates dataset identifer using esgvoc.
+            """
+
+            validate_dataset_id(self.get_argument(_PARAM_PROJECT), self.get_argument(_PARAM_IDENTIFIER))
 
 
         def _set_output():

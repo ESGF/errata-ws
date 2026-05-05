@@ -1,14 +1,25 @@
 import tornado
+from datetime import datetime
 
 from errata_ws import db
 from errata_ws.utils import constants
-from errata_ws.utils import http_security
 from errata_ws.utils.http import process_request
 
 
 
 # Query parameter names.
 _PARAM_UID = 'uid'
+
+
+def _serialize(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, dict):
+        return {k: _serialize(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_serialize(v) for v in obj]
+    else:
+        return obj
 
 
 class RetrieveErrataRequestHandler(tornado.web.RequestHandler):
@@ -43,10 +54,11 @@ class RetrieveErrataRequestHandler(tornado.web.RequestHandler):
             """Sets response to be returned to client.
 
             """
-            self.output = {
+            raw_output = {
                 'issue': self.issue.to_dict(self.resources, self.facets)
             }
 
+            self.output = _serialize(raw_output)
 
         # Process request.
         process_request(self, [

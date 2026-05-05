@@ -1,5 +1,5 @@
 import os
-import logger
+from errata_ws.utils import logger
 import json
 
 from errata_ws.utils.convertor import json_file_to_namedtuple

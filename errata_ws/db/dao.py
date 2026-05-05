@@ -1,10 +1,10 @@
 from sqlalchemy import or_
+from collections import defaultdict
 
 from errata_ws.db.dao_validator import validate_delete_facets
 from errata_ws.db.dao_validator import validate_delete_resources
 from errata_ws.db.dao_validator import validate_get_datasets
 from errata_ws.db.dao_validator import validate_get_issue
-from errata_ws.db.dao_validator import validate_get_issues
 from errata_ws.db.dao_validator import validate_get_resources
 from errata_ws.db.models import Issue
 from errata_ws.db.models import IssueFacet
@@ -110,7 +110,6 @@ def get_descriptions():
     return [(x[0], x[1])for x in qry.all()]
 
 
-@validate(validate_get_issues)
 def get_issues(criteria, exclude_in_moderation=True):
     """Returns collection of matching issues.
 
@@ -130,7 +129,7 @@ def get_issues(criteria, exclude_in_moderation=True):
         as_date_string(Issue.updated_date),
         Issue.moderation_status
         )
-
+    
     if exclude_in_moderation is True:
         print(777)
         qry = qry.filter(Issue.moderation_status.notin_([
@@ -138,10 +137,10 @@ def get_issues(criteria, exclude_in_moderation=True):
             constants.ISSUE_MODERATION_REJECTED
             ]))
 
-    for item in criteria:
+    for collection, term in criteria.items():
         sub_qry = query(IssueFacet.issue_uid)
-        sub_qry = sub_qry.filter(IssueFacet.facet_type == ':'.join(item.split(':')[0:3]))
-        sub_qry = text_filter(sub_qry, IssueFacet.facet_value, item.split(':')[-1])
+        sub_qry = sub_qry.filter(IssueFacet.facet_type == collection)
+        sub_qry = text_filter(sub_qry, IssueFacet.facet_value, term)
         qry = qry.filter(Issue.uid.in_(sub_qry))
     
     return qry.all()
@@ -195,7 +194,12 @@ def get_project_facets():
         )
     qry = qry.distinct()
 
-    return sorted(['{}:{}'.format(i[0], i[1]) for i in qry.all()])
+    result = defaultdict(list)
+
+    for i in qry.all():
+        result[i[0]].append(i[1])
+
+    return dict(result)
 
 
 @validate(validate_get_resources)

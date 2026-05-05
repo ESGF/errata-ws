@@ -10,10 +10,10 @@ import sqlalchemy as sa
 
 
 # Set of types to be ignored when jsonifying.
-_IGNOREABLE = (int, float, long, type(None), unicode)
+_IGNOREABLE = (int, float, type(None))
 
 # Set of unicodeable types used in jsonifying.
-_UNICODEABLE = (basestring, datetime.datetime, uuid.UUID)
+_UNICODEABLE = (datetime.datetime, uuid.UUID)
 
 # Values considered to be abbreviations.
 _ABBREVIATIONS = ("id", "uid", "uuid")
@@ -41,15 +41,14 @@ def to_dict(data, key_convertor=None):
 
     # Unicodeable types.
     elif isinstance(data, _UNICODEABLE):
-        return unicode(data)
+        return str(data)
 
     # Dictionaries.
-    elif isinstance(data, collections.Mapping):
-        return {k if key_convertor is None else key_convertor(k):
-                to_dict(v, key_convertor) for k, v in data.iteritems()}
+    elif isinstance(data, collections.abc.Mapping):
+        return dict(data)
 
     # Collections.
-    elif isinstance(data, collections.Iterable):
+    elif isinstance(data, collections.abc.Iterable):
         return [to_dict(i, key_convertor) for i in data]
 
     # SqlAlchemy model instances.
@@ -204,7 +203,7 @@ def to_underscore_case(target):
 
     """
     if target is None or not len(target):
-        return unicode()
+        return str()
 
     result = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', target)
     result = re.sub('([a-z0-9])([A-Z])', r'\1_\2', result)

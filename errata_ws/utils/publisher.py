@@ -1,14 +1,17 @@
-import pyessv
+import esgvoc.api as ev
+from esgvoc.api.projects import _search_plain_term_and_valid_value, _get_project_session_with_exception # Temporary fix to get the term id
 
 import datetime as dt
 
 from errata_ws.utils.constants import *
-from errata_ws.utils.facet_extractor import extract_facets
+from errata_ws.utils import exceptions
 from errata_ws.db.models import Issue
 from errata_ws.db.models import IssueFacet
 from errata_ws.db.models import IssueResource
 from errata_ws.db.models import PIDServiceTask
+from errata_ws.utils.validation import validate_dataset_id
 
+from resources.mappers import metadata_mapper
 
 
 def get_entities_on_errata_create(obj, user_id, user_role):
@@ -50,7 +53,7 @@ def get_entities_on_errata_propose(obj, user_email):
     # Issue - core fields.
     issue = Issue()
     issue.description = obj[JF_DESCRIPTION].strip()
-    issue.moderation_status = ISSUE_MODERATION_IN_REVIEW.decode('utf-8')
+    issue.moderation_status = ISSUE_MODERATION_IN_REVIEW
     issue.project = obj[JF_PROJECT].lower()
     issue.institute = get_institute(obj)
     issue.severity = obj[JF_SEVERITY].lower()
@@ -114,19 +117,25 @@ def close_issue(issue, status, user_id, user_role):
 
 
 def get_institute(obj):
-    """Returns insitiute identifier from issue data.
+    """Returns institute identifier from issue data.
 
     """
-    return get_institutes(obj)[0].canonical_name
+    # Validate the dataset_id and extract the validated terms
+    validated_terms = validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0].split("#")[0])["mapping_used"]
 
+    # Find the exact collection name for the project
+    collection_name = ev.find_collections_in_project(expression="institu", project_id=obj[JF_PROJECT])
+    if collection_name and isinstance(collection_name[0], tuple):
+        collection_name = collection_name[0][0]
+    else:
+        raise exceptions.CollectionNotFoundInProject(obj[JF_PROJECT], "institu")
 
-def get_institutes(obj):
-    """Returns insitiute identifiers from issue data.
+    # Get the id of the institution
+    # TO DO: Replace the function by the one searching a specific field
+    with _get_project_session_with_exception(obj[JF_PROJECT]) as session:
+        institution_id = _search_plain_term_and_valid_value(validated_terms[collection_name], collection_name, session)
 
-    """
-    terms = pyessv.parse_dataset_identifers(obj[JF_PROJECT], obj[JF_DATASETS])
-
-    return [i for i in terms if i.collection.canonical_name in ('institute', 'institution-id')]
+    return institution_id
 
 
 def _get_resources(issue, obj):
@@ -165,7 +174,7 @@ def _get_facets(issue, obj):
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
-        facet.facet_type = u'esdoc:errata:{}'.format(facet_type)
+        facet.facet_type = facet_type
         if facet_type == FACET_TYPE_MODERATION_STATUS:
             facet.facet_value = issue.moderation_status.lower()
         else:
@@ -173,12 +182,12 @@ def _get_facets(issue, obj):
         facets.append(facet)
 
     # Project specific facets.
-    for term in pyessv.parse_dataset_identifers(issue.project, obj[JF_DATASETS]):
+    for collection, term in validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0].split("#")[0])["mapping_used"].items():
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
-        facet.facet_type = term.collection.namespace
-        facet.facet_value = term.canonical_name
+        facet.facet_type = collection
+        facet.facet_value = term
         facets.append(facet)
 
     return facets
@@ -189,8 +198,14 @@ def _get_pid_tasks(issue, obj):
 
     """
     pid_tasks = []
-    project = pyessv.load('esdoc:errata:project:{}'.format(issue.project))
-    if project.data['is_pid_client'] == True:
+    project_terms = metadata_mapper["project"]['terms']
+
+    for term in project_terms:
+        if term['canonical_name'] == issue.project:
+            term = term
+            break
+
+    if term['is_pid_client'] == True:
         for identifier in obj[JF_DATASETS]:
             task = PIDServiceTask()
             task.action = PID_ACTION_INSERT

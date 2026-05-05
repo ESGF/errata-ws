@@ -35,9 +35,11 @@
         },
         "project": {
             "enum": [
-                "cmip5",
                 "cmip6",
-                "cordex",
+                "cmip6plus",
+                "cmip7",
+                "cordex-cmip5",
+                "cordex-cmip6",
                 "input4mips"
             ],
             "minLength": 1,

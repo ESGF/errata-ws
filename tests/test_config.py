@@ -1,5 +1,3 @@
-import pyessv
-
 from errata_ws.utils import config
 
 from tests import utils as tu

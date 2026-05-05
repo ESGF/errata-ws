@@ -1,9 +1,7 @@
 import uuid
 import re
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from requests.packages.urllib3.exceptions import InsecurePlatformWarning
-from requests.packages.urllib3.exceptions import SNIMissingWarning
+import urllib3
 
 from errata_ws.handle_service.constants import *
 from errata_ws.handle_service import constants
@@ -13,9 +11,7 @@ from errata_ws.utils import config
 
 
 # Disable requests warnings.
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-requests.packages.urllib3.disable_warnings(SNIMissingWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def get_handle_by_handle_string(handle_string, handle_client_instance):
@@ -31,8 +27,8 @@ def get_handle_by_handle_string(handle_string, handle_client_instance):
     logger.log('GETTING HANDLE FROM HANDLE SERVER WITH KEY... ' + handle_string)
     encoded_dict = handle_client_instance.retrieve_handle_record(handle_string)
     if encoded_dict is not None:
-        handle_record = {k.decode('utf8'): v.decode('utf8') for k, v in encoded_dict.items()}
-        return handle_record
+        return encoded_dict
+
     else:
         raise exceptions.HandleNotFoundError
 
@@ -106,7 +102,7 @@ def make_suffix_from_drsid_and_versionnumber(**args):
     :rtype: str
 
     """
-    print args['drs_id'] + '.v' + str(args['version_number'])
+    print(args['drs_id'] + '.v' + str(args['version_number']))
     check_presence_of_mandatory_args(args, ['drs_id', 'version_number'])
     hash_basis = args['drs_id']+'.v'+str(args['version_number'])
     hash_basis_utf8 = hash_basis.encode('utf-8')

@@ -1,10 +1,12 @@
-import pyessv
+import esgvoc.api as ev
 import tornado
 
 from errata_ws import db
 from errata_ws.utils import http_security
 from errata_ws.utils.http import process_request
+from errata_ws.utils.mapper import map_collection
 
+from resources.mappers import metadata_mapper, esgvoc_mapper
 
 
 class SearchErrataSetupRequestHandler(tornado.web.RequestHandler):
@@ -27,59 +29,21 @@ class SearchErrataSetupRequestHandler(tornado.web.RequestHandler):
 
             """
             # Set vocabs to be loaded.
-            vocabs = {
-                'esdoc:errata:project',
-                'esdoc:errata:severity',
-                'esdoc:errata:status',
-                'esdoc:errata:moderation-status'
-            }
-            for project in pyessv.load('esdoc:errata:project'):
-                for vocab in project.data['facets']:
-                    vocabs.add(vocab)
+            vocabs = [metadata_mapper[collection] for collection in ['project', 'severity', 'status', 'moderation-status']]
+
+            for project in ev.get_all_projects():
+                for collection in esgvoc_mapper[project]:
+                    vocabs.append(map_collection(project, collection))
 
             # Get facet values.
             with db.session.create():
-                facet_values = set(db.dao.get_project_facets())                
+                facet_values = db.dao.get_project_facets()
 
             # Set output.
             self.output = {
-                'vocabs': [_map_collection(i) for i in sorted(vocabs)],
+                'vocabs': vocabs,
                 'values': facet_values
             }
 
         # Process request.
         process_request(self, _set_output)
-
-
-def _map_collection(identifier):
-    """Converts a pyessv collection to a dictionary.
-
-    """
-    collection = pyessv.load(identifier)
-
-    result = {
-        'canonical_name': collection.canonical_name,
-        'key': collection.namespace,
-        'label': collection.label,
-        'namespace': collection.namespace,
-        'terms': [_map_term(i) for i in collection]
-    }
-    if collection.data is not None:
-        result.update(collection.data)
-
-    return result
-
-
-def _map_term(term):
-    """Converts a pyessv term to a dictionary.
-
-    """
-    result = {
-        'canonical_name': term.canonical_name,
-        'key': term.namespace,
-        'label': term.label,
-        'namespace': term.namespace
-    }
-    result.update(term.data)
-
-    return result

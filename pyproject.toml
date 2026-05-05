@@ -1,0 +1,29 @@
+[project]
+name = "errata-ws"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "arrow>=1.4.0",
+    "b2handle>=1.1.2",
+    "esgvoc>=3.0.0",
+    "jsonschema>=4.26.0",
+    "psycopg2-binary>=2.9.11",
+    "requests-oauthlib>=2.0.0",
+    "tornado>=6.5.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "errata_ws"
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "jupyter-console>=6.6.3",
+    "rich>=14.3.1",
+]
