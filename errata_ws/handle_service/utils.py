@@ -27,8 +27,8 @@ def get_handle_by_handle_string(handle_string, handle_client_instance):
     logger.log('GETTING HANDLE FROM HANDLE SERVER WITH KEY... ' + handle_string)
     encoded_dict = handle_client_instance.retrieve_handle_record(handle_string)
     if encoded_dict is not None:
-        handle_record = {k.decode('utf8'): v.decode('utf8') for k, v in encoded_dict.items()}
-        return handle_record
+        return encoded_dict
+
     else:
         raise exceptions.HandleNotFoundError
 
