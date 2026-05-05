@@ -1,13 +1,13 @@
 {
     "$schema": "http://json-schema.org/schema#",
-    "additionalProperties": false,
+    "additionalProperties": true,
     "properties": {
-        "criteria": {
+        "project": {
             "type": "array"
         }
     },
     "required": [
-        "criteria"
+        "project"
     ],
     "title": "ES-DOC errata JSON schema: endpoint = /1/issue/search",
     "type": "object"
