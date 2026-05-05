@@ -9,7 +9,7 @@ main()
 	log "DB : setting up ..."
 
 	pushd $ERRATA_WS_HOME
-	pipenv run python $ERRATA_WS_HOME/sh/db_setup.py
+	uv run python $ERRATA_WS_HOME/sh/db_setup.py
 
 	log "DB : set up complete ..."
 }
