@@ -51,7 +51,7 @@ class CreateErrataRequestHandler(tornado.web.RequestHandler):
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
+                validate_dataset_id(self.request.data[constants.JF_PROJECT], dset.split("#")[0])
 
 
         def _validate_user_access():
@@ -98,7 +98,7 @@ class CreateErrataRequestHandler(tornado.web.RequestHandler):
                 entities = get_entities_on_errata_create(self.request.data, self.user_id, self.user_role)
 
                 # Insert issue first so that the foreign keys can be established.
-                db.session.insert(entities[0])
+                db.session.insert(entities[0], auto_commit=False)
 
                 # Insert facets/resources/pid-tasks.
                 for entity in entities[1:]:

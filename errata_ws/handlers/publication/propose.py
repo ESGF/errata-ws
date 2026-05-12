@@ -53,8 +53,8 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            # Exception if esgvoc dataset parsing fails.
-            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
+                # Exception if esgvoc dataset parsing fails.
+                validate_dataset_id(self.request.data[constants.JF_PROJECT], dset.split("#")[0])
 
 
         def _validate_issue_title():
@@ -89,7 +89,7 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 entities = get_entities_on_errata_propose(self.request.data, self.request.data["userEmail"])
 
                 # Insert errata.
-                db.session.insert(entities[0])
+                db.session.insert(entities[0], auto_commit=False)
 
                 # Insert associated entities (facets/resources/pid-tasks).
                 for entity in entities[1:]:
