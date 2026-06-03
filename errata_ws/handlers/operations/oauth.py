@@ -114,4 +114,4 @@ def _encode_credentials(user, token):
     user_id = user['login'].strip()
     access_token = token['access_token'].strip()
 
-    return base64.encodestring('{}:{}'.format(user_id, access_token))
+    return base64.encodebytes('{}:{}'.format(user_id, access_token).encode('utf-8')).decode('utf-8').replace('\n', '')
