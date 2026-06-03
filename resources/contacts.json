@@ -1,0 +1,59 @@
+{
+  "default": [
+    "errata-moderation@es-doc.org"
+  ],
+  "AER": [
+    "emlawer@aer.com"
+  ],
+  "CCCR-IITM": [
+    "iitm-esm@tropmet.res.in"
+  ],
+  "CMCC": [
+    "cmcc-cmip-contact@cmcc.it"
+  ],
+  "CNRM-CERFACS": [
+    "contact.cmip@meteo.fr",
+    "contact.cmip6@cerfacs.fr"
+  ],
+  "E3SM-project": [
+    "E3SM-DATA-SUPPORT@llnl.gov"
+  ],
+  "FIO-QLNM": [
+    "songroy@fio.org.cn",
+    "qiaofl@fio.org.cn"
+  ],
+  "HAMMOZ-Consortium": [
+    "aerchemmip_echam-ham@sympa.ethz.ch"
+  ],
+  "IPSL": [
+    "abennasser@ipsl.fr",
+    "glipsl@ipsl.fr"
+  ],
+  "MOHC": [
+    "matthew.mizielinski@metoffice.gov.uk"
+  ],
+  "MRI": [
+    "ngmn11ts@mri-jma.go.jp"
+  ],
+  "NCC": [
+    "noresm-ncc@met.no"
+  ],
+  "NERC": [
+    "matthew.mizielinski@metoffice.gov.uk"
+  ],
+  "NOAA-GFDL": [
+    "gfdl.climate.model.info@noaa.gov"
+  ],
+  "NUIST": [
+    "esmc@nuist.edu.cn"
+  ],
+  "PNNL-WACCEM": [
+    "koichi.sakaguchi@pnnl.gov"
+  ],
+  "SNU": [
+    "juwon.kim@snu.ac.kr"
+  ],
+  "UA": [
+    "ronalstouffer@arizona.edu"
+  ]
+}

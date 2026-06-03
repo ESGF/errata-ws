@@ -66,10 +66,16 @@ class CallbackRequestHandler(tornado.web.RequestHandler):
         # The user has been redirected back from the OAuth provider.
         # With this redirection comes an authorization code included
         # in the redirect URL. We will use that to obtain an access token.
+        state = self.get_secure_cookie('errata-oauth-state')
+
+        if state:
+            state = state.decode()
+
         gh_session = OAuth2Session(
             OAUTH_CLIENT_ID,
-            state=self.get_secure_cookie('errata-oauth-state')
-            )
+            state=state
+        )
+
         token = gh_session.fetch_token(
             OAUTH_URL_ACCESS_TOKEN,
             client_secret=OAUTH_CLIENT_SECRET,
