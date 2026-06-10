@@ -29,7 +29,7 @@ class SearchErrataSetupRequestHandler(tornado.web.RequestHandler):
 
             """
             # Set vocabs to be loaded.
-            vocabs = [metadata_mapper[collection] for collection in ['project', 'severity', 'status', 'moderation-status']]
+            vocabs = [metadata_mapper[collection] for collection in ['project', 'severity', 'status', 'moderationStatus']]
 
             for project in ev.get_all_projects():
                 for collection in esgvoc_mapper[project]:
