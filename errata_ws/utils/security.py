@@ -223,31 +223,43 @@ def authorize_user(team_id, user_id):
     if r.status_code != 200:
         raise AuthorizationError()
 
-
 def strip_credentials(credentials):
-    """Strips passed credentials from HTTP header.
+    """Strips and decodes HTTP Basic authentication credentials.
 
-    :param str credentials: Base64 encoded, ':' delimited credentials.
+    Accepts either:
+        - str (Authorization header value)
+        - bytes (raw header value)
 
-    :returns: Stripped credentials.
-    :rtype: tuple
+    Expected format after decoding:
+        "username:password" (Base64-encoded)
 
+    :param credentials: Base64 encoded HTTP Basic credentials.
+    :type credentials: str | bytes
+
+    :returns: (username, password)
+    :rtype: tuple[str, str]
+
+    :raises AuthenticationError: If decoding or parsing fails.
     """
-    # Strip out HTTP Basic authorization header prefix.
-    credentials = credentials.replace('Basic ', '')
 
-    # Decode (b64).
+    # Normalize to string first
+    if isinstance(credentials, bytes):
+        credentials = credentials.decode("utf-8")
+
+    # Remove "Basic " prefix if present
+    credentials = credentials.replace("Basic ", "")
+
     try:
-        credentials = base64.b64decode(credentials)
-    except TypeError:
+        # Base64 decode -> bytes
+        decoded = base64.b64decode(credentials)
+    except (TypeError, binascii.Error):
         raise AuthenticationError()
 
-    # Extract.
-    credentials = credentials.split(':')
-    if len(credentials) != 2:
+    try:
+        # Convert to string and split
+        decoded = decoded.decode("utf-8")
+        username, password = decoded.split(":", 1)
+    except ValueError:
         raise AuthenticationError()
 
-    # Decode (utf-8).
-    credentials = [i.decode('utf-8') for i in credentials]
-
-    return tuple(credentials)
+    return username, password
