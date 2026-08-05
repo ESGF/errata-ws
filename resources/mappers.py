@@ -14,6 +14,15 @@ metadata_mapper = {
                 'is_pid_client': True
             },
             {
+                'canonical_name': 'cmip6plus',
+                'key': 'cmip6plus',
+                'label': 'CMIP6Plus',
+                'namespace': 'cmip6plus',
+                'facets': ['institution_id', 'experiment_id', 'source_id', 'variable_id'],
+                'is_documented': True,
+                'is_pid_client': True
+            },
+            {
                 'canonical_name': 'cmip7',
                 'key': 'cmip7',
                 'label': 'CMIP7',
@@ -169,6 +178,7 @@ metadata_mapper = {
 
 esgvoc_mapper = {
     "cmip6": ["institution_id", "experiment_id", "source_id", "variable_id"],
+    "cmip6plus": ["institution_id", "experiment_id", "source_id", "variable_id"],
     "cmip7": ["institution", "experiment", "source", "variable"],
     "cordex-cmip5": ["institute", "experiment", "rcm_model", "variable"],
     "cordex-cmip6": ["institution_id", "driving_experiment_id", 'source_id', "variable_id"],
@@ -177,6 +187,12 @@ esgvoc_mapper = {
 
 collection_mapper = {
     "cmip6": {
+        "institution_id": "Organization",
+        "experiment_id": "Experiment",
+        "source_id": "Source",
+        "variable_id": "Variable"
+    },
+    "cmip6plus": {
         "institution_id": "Organization",
         "experiment_id": "Experiment",
         "source_id": "Source",
