@@ -138,10 +138,14 @@ def get_issues(criteria, exclude_in_moderation=True):
             ]))
 
     for collection, term in criteria.items():
-        sub_qry = query(IssueFacet.issue_uid)
-        sub_qry = sub_qry.filter(IssueFacet.facet_type == collection)
-        sub_qry = text_filter(sub_qry, IssueFacet.facet_value, term)
-        qry = qry.filter(Issue.uid.in_(sub_qry))
+        if collection == 'moderation_status':
+            qry = qry.filter(Issue.moderation_status == term)
+        else:
+            sub_qry = query(IssueFacet.issue_uid)
+            sub_qry = sub_qry.filter(IssueFacet.facet_type == collection)
+            sub_qry = text_filter(sub_qry, IssueFacet.facet_value, term)
+            qry = qry.filter(Issue.uid.in_(sub_qry))
+
     
     return qry.all()
 
