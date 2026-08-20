@@ -52,7 +52,7 @@ class SearchErrataRequestHandler(tornado.web.RequestHandler):
                         'status': row[5],
                         'dateCreated': row[6],
                         'dateUpdated': row[7],
-                        'moderationStatus': row[9]
+                        'moderation_status': row[9]
                     }
                     for row in rows
                 ]

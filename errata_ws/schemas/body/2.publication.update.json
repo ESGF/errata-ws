@@ -23,7 +23,7 @@
             "type": "array",
             "uniqueItems": true
         },
-        "moderationStatus": {
+        "moderation_status": {
             "enum": [
                 "accepted",
                 "in-review",

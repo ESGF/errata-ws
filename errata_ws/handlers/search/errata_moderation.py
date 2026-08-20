@@ -40,6 +40,7 @@ class SearchErrataModerationRequestHandler(tornado.web.RequestHandler):
 
             """
             with db.session.create():
+                print("CRIT MOD", self.criteria)
                 rows = db.dao.get_issues(self.criteria, False)
                 # Convert rows to dictionaries, ensuring all fields are included
                 self.issues = [
@@ -52,7 +53,7 @@ class SearchErrataModerationRequestHandler(tornado.web.RequestHandler):
                         'status': row[5],
                         'dateCreated': row[6],
                         'dateUpdated': row[7],
-                        'moderationStatus': row[9]
+                        'moderation_status': row[9]
                     }
                     for row in rows
                 ]

@@ -65,8 +65,8 @@ metadata_mapper = {
             }
         ]
     },
-    "moderationStatus": {
-        "key": "moderationStatus",
+    "moderation_status": {
+        "key": "moderation_status",
         "label": "Moderation status",
         "project": None,
         "terms": [
