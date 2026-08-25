@@ -4,7 +4,8 @@ from email.mime.text import MIMEText
 
 from errata_ws.notifications import constants
 from errata_ws.notifications import templates
-# from errata_ws.utils import contacts
+from errata_ws.utils import security
+from errata_ws.utils import contacts
 
 def dispatch_on_accepted(http_protocol, web_host, address_of_proposer, errata_uid):
 	"""Dispatches an email upon acceptance of an errata by a moderator.
@@ -50,9 +51,13 @@ def dispatch_on_proposed_2(http_protocol, web_host, address_of_proposer, errata_
 	# duplicate notification with core moderation mailing list.
 	body = templates.get_on_proposed_email_body_2(http_protocol, web_host, address_of_proposer, errata_uid)
 	subject = constants.ON_ERRATA_PROPOSED_EMAIL_SUBJECT
-	# send an email to the default mailing list
-	msg = _get_message(contacts["default"], body, subject)
-	_dispatch(msg)
+	try:
+		# send an email to the default mailing list
+		msg = _get_message(contacts["default"], body, subject)
+		_dispatch(msg)
+	except Exception as e:
+		pass
+	
 	# get institute specific email address from config if exists send another email
 	try:
 		emails = contacts[institute]
@@ -61,7 +66,34 @@ def dispatch_on_proposed_2(http_protocol, web_host, address_of_proposer, errata_
 				msg = _get_message(e, body, subject)
 				_dispatch(msg)
 	except Exception as e:
-		pass    
+		pass
+	
+
+def dispatch_on_proposed_3(http_protocol, web_host, address_of_proposer, errata_uid):
+	"""Dispatches an email to moderators upon proposal of an errata.
+
+	:param http_protocol: HTTP protocol of web-service serving errata content.
+	:param web_host: Host of web-service serving errata content.
+	:param address_of_proposer: Email address of errata proposer.
+	:param errata_uid: Unique identifier of errata being processed.
+	"""
+	body = templates.get_on_proposed_email_body_2(
+		http_protocol,
+		web_host,
+		address_of_proposer,
+		errata_uid,
+	)
+	subject = constants.ON_ERRATA_PROPOSED_EMAIL_SUBJECT
+
+	moderator_members = security.get_team_members(
+		'errata-moderation'
+	)
+
+	moderator_contacts = contacts["moderators"]
+	for member in moderator_members:
+		if member in moderator_contacts:				
+			msg = _get_message(moderator_contacts[member], body, subject)
+			_dispatch(msg)
 
 
 def dispatch_on_rejected(http_protocol, web_host, address_of_proposer, errata_uid):

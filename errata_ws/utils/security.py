@@ -28,6 +28,7 @@ _GH_API_TEAMS = "https://api.github.com/teams"
 
 # GitHub API - user.
 _GH_API_USER = "https://api.github.com/user"
+_GH_API_USERS = "https://api.github.com/users"
 
 # Map of recognized teams and their GitHub identifiers.
 _GH_TEAMS = {
@@ -404,6 +405,31 @@ def authorize_user(team_id, user_id):
     # Assert user is a team member.
     if r.status_code != 200:
         raise AuthorizationError()
+
+
+def get_team_members(team_id):
+    """Returns GitHub logins of all members of a team.
+
+    :param str team_id: GitHub team identifier.
+    :returns: List of GitHub usernames.
+    :rtype: list[str]
+    """
+    assert team_id in _GH_TEAMS, "Invalid team identifier {}".format(team_id)
+
+    url = '{}/{}/members'.format(
+        _GH_API_TEAMS,
+        _GH_TEAMS[team_id],
+    )
+
+    r = requests.get(url, headers=_GH_API_HEADERS)
+
+    if r.status_code != 200:
+        raise AuthorizationError(
+            "Unable to retrieve GitHub team members"
+        )
+
+    return [member['login'] for member in r.json()]
+
 
 def strip_credentials(credentials):
     """Strips and decodes HTTP Basic authentication credentials.

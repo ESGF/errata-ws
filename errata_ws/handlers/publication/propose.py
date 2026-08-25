@@ -112,13 +112,18 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 self.issue_created_by,
                 self.issue_uid
             )
-            notifications.dispatch_on_proposed_2(
+            # notifications.dispatch_on_proposed_2(
+            #     self.request.protocol,
+            #     self.request.host,
+            #     self.issue_created_by,
+            #     self.issue_uid,
+            #     self.issue_institute
+            # )
+            notifications.dispatch_on_proposed_3(
                 self.request.protocol,
                 self.request.host,
                 self.issue_created_by,
                 self.issue_uid,
-                self.issue_institute
-
             )
 
 

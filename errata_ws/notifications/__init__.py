@@ -1,5 +1,6 @@
 from errata_ws.notifications.dispatcher import dispatch_on_accepted
 from errata_ws.notifications.dispatcher import dispatch_on_proposed_1
 from errata_ws.notifications.dispatcher import dispatch_on_proposed_2
+from errata_ws.notifications.dispatcher import dispatch_on_proposed_3
 from errata_ws.notifications.dispatcher import dispatch_on_rejected
 
