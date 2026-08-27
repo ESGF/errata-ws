@@ -10,8 +10,26 @@ from errata_ws.utils import http_security
 from errata_ws.utils.http import process_request
 from errata_ws.utils.publisher import get_institute
 from errata_ws.utils.publisher import get_entities_on_errata_update
+from errata_ws.utils.publisher import get_pid_tasks_on_errata_update
 from errata_ws.utils.http_security import authorize
 from errata_ws.utils.validation import validate_url, validate_dataset_id
+
+
+def persist_errata_update(issue, obj, user_id, user_role):
+    """Persist an errata update and its PID tasks in the active transaction."""
+    datasets_old = db.dao.get_datasets(issue.uid)
+
+    db.dao.delete_facets(issue.uid)
+    db.dao.delete_resources(issue.uid)
+
+    entities = get_entities_on_errata_update(issue, obj, user_id, user_role)
+    for entity in entities:
+        db.session.insert(entity, auto_commit=False)
+
+    datasets_new = set(obj[constants.JF_DATASETS])
+    tasks = get_pid_tasks_on_errata_update(issue.uid, datasets_old, datasets_new)
+    for task in tasks:
+        db.session.insert(task, auto_commit=False)
 
 
 class UpdateErrataRequestHandler(tornado.web.RequestHandler):
@@ -110,30 +128,14 @@ class UpdateErrataRequestHandler(tornado.web.RequestHandler):
             """Persists data to dB.
 
             """
-            # Get old datasets.
-            dsets_old = db.dao.get_datasets(self.issue.uid)
-
-            # Delete existing facets / resources.
-            db.dao.delete_facets(self.issue.uid)
-            db.dao.delete_resources(self.issue.uid)
-
-            # Update issue.
-            for entity in get_entities_on_errata_update(self.issue, self.request.data, self.user_id, self.user_role):
-                db.session.insert(entity, auto_commit=False)
-            db.session.commit()
-
-            # Update PID handle errata.
-            dsets_new = db.dao.get_datasets(self.issue.uid)
-            for action, identifiers in (
-                (constants.PID_ACTION_DELETE, dsets_old - dsets_new),
-                (constants.PID_ACTION_INSERT, dsets_new - dsets_old)
-            ):
-                for identifier in identifiers:
-                    task = db.models.PIDServiceTask()
-                    task.action = action
-                    task.issue_uid = self.issue.uid
-                    task.dataset_id = identifier
-                    db.session.insert(task, False)
+            # The surrounding commitable session performs the single commit;
+            # PID dispatch itself remains asynchronous.
+            persist_errata_update(
+                self.issue,
+                self.request.data,
+                self.user_id,
+                self.user_role
+            )
 
 
         def _notify_on_moderation():

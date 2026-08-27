@@ -214,3 +214,25 @@ def _get_pid_tasks(issue, obj):
             pid_tasks.append(task)
 
     return pid_tasks
+
+
+def get_pid_tasks_on_errata_update(issue_uid, datasets_old, datasets_new):
+    """Return PID tasks required by a change in dataset membership.
+
+    Metadata-only errata updates produce no tasks. The caller persists the
+    returned tasks in the same transaction as the errata update; dispatch
+    remains asynchronous.
+    """
+    pid_tasks = []
+    for action, identifiers in (
+        (PID_ACTION_DELETE, set(datasets_old) - set(datasets_new)),
+        (PID_ACTION_INSERT, set(datasets_new) - set(datasets_old))
+    ):
+        for identifier in sorted(identifiers):
+            task = PIDServiceTask()
+            task.action = action
+            task.issue_uid = issue_uid
+            task.dataset_id = identifier
+            pid_tasks.append(task)
+
+    return pid_tasks
