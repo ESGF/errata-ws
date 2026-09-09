@@ -163,6 +163,7 @@ def _get_facets(issue, obj):
 
     """
     facets = []
+    unique_facets = set()
 
     # Core facets.
     for facet_type in {
@@ -171,23 +172,30 @@ def _get_facets(issue, obj):
             FACET_TYPE_SEVERITY,
             FACET_TYPE_STATUS
         }:
+        if facet_type == FACET_TYPE_MODERATION_STATUS:
+            facet_value = issue.moderation_status.lower()
+        else:
+            facet_value = getattr(issue, facet_type).lower()
+        unique_facets.add((facet_type, facet_value))
+
+    # Project specific facets.
+    for dataset in obj[JF_DATASETS]:
+        mapping = validate_dataset_id(
+            obj[JF_PROJECT],
+            dataset.split("#")[0]
+        )["mapping_used"]
+
+        for collection, term in mapping.items():
+            unique_facets.add((collection, term))
+
+    # Create entities.
+    for facet_type, facet_value in unique_facets:
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
         facet.facet_type = facet_type
-        if facet_type == FACET_TYPE_MODERATION_STATUS:
-            facet.facet_value = issue.moderation_status.lower()
-        else:
-            facet.facet_value = getattr(issue, facet_type).lower()
-        facets.append(facet)
+        facet.facet_value = facet_value
 
-    # Project specific facets.
-    for collection, term in validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0].split("#")[0])["mapping_used"].items():
-        facet = IssueFacet()
-        facet.project = issue.project
-        facet.issue_uid = issue.uid
-        facet.facet_type = collection
-        facet.facet_value = term
         facets.append(facet)
 
     return facets

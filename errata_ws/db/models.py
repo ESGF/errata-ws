@@ -130,7 +130,7 @@ class Issue(Entity):
 
             for i in facets:
                 if i.issue_uid == self.uid:
-                    result[i.facet_type] = i.facet_value
+                    result[i.facet_type].append(i.facet_value)
 
             return dict(result)
 
