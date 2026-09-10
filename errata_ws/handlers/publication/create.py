@@ -51,7 +51,7 @@ class CreateErrataRequestHandler(tornado.web.RequestHandler):
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0].split("#")[0])
+            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0])
 
 
         def _validate_user_access():

@@ -1,7 +1,7 @@
 import uuid
-
 import arrow
 import requests
+import re
 
 from errata_ws.utils import config
 from errata_ws.utils import exceptions
@@ -175,15 +175,31 @@ def validate_url(url):
     raise exceptions.InvalidURLError(url)
 
 
-def validate_dataset_id(project: str, dataset_id: str) -> dict[str, str | list | dict[str, str]]:
-    """
-    Validate a dataset_id based on a project's DRS with esgvoc, then return its facets if valid, raise an error otherwise
-    """
-    try:
-        validator = DrsValidator(project_id=project)
-        validated_terms = validator.validate_dataset_id(drs_expression=dataset_id)
-        assert not validated_terms.errors
+def validate_dataset_id(project: str, dataset_id: str) -> dict:
+    drs_expression = get_esgvoc_dataset_id(project, dataset_id)
+    validator = DrsValidator(project_id=project)
+    validation = validator.validate_dataset_id(drs_expression=drs_expression)
+    if validation.errors:
+        raise exceptions.InvalidDatasetIdentifierError(dataset_id,validation.errors)
+    return validation.model_dump()
 
-        return validated_terms.model_dump()
-    except AssertionError:
-        raise exceptions.InvalidDatasetIdentifierError(dataset_id)
+
+def get_esgvoc_dataset_id(project: str, identifier: str) -> str:
+    """Convert an errata dataset identifier into an esgvoc DRS expression."""
+    identifier = identifier.strip()
+    dataset_id, separator, version = identifier.partition("#")
+
+    if project.lower() == "cmip7":
+        # A native CMIP7 identifier already contains its directory date.
+        if re.search(r"\.v\d{8}$", dataset_id):
+            return dataset_id
+
+        # Support the legacy errata notation: dataset#YYYYMMDD.
+        if separator and re.fullmatch(r"v?\d{8}", version):
+            version = version[1:] if version.startswith("v") else version
+            return f"{dataset_id}.v{version}"
+
+        return dataset_id
+
+    # Legacy projects use #version outside their esgvoc dataset ID.
+    return dataset_id

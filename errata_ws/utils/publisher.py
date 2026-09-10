@@ -121,7 +121,7 @@ def get_institute(obj):
 
     """
     # Validate the dataset_id and extract the validated terms
-    validated_terms = validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0].split("#")[0])["mapping_used"]
+    validated_terms = validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0])["mapping_used"]
 
     # Find the exact collection name for the project
     collection_name = ev.find_collections_in_project(expression="institu", project_id=obj[JF_PROJECT])
@@ -182,7 +182,7 @@ def _get_facets(issue, obj):
         facets.append(facet)
 
     # Project specific facets.
-    for collection, term in validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0].split("#")[0])["mapping_used"].items():
+    for collection, term in validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0])["mapping_used"].items():
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
