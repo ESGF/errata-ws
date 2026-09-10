@@ -180,9 +180,9 @@ def validate_dataset_id(project: str, dataset_id: str) -> dict:
     validator = DrsValidator(project_id=project)
     validation = validator.validate_dataset_id(drs_expression=drs_expression)
     if validation.errors:
-        raise exceptions.InvalidDatasetIdentifierError(dataset_id,validation.errors)
+        details = [error.model_dump(mode="json") for error in validation.errors]
+        raise exceptions.InvalidDatasetIdentifierError(dataset_id, details)
     return validation.model_dump()
-
 
 def get_esgvoc_dataset_id(project: str, identifier: str) -> str:
     """Convert an errata dataset identifier into an esgvoc DRS expression."""

@@ -175,25 +175,25 @@ def _write(handler, data, encoding='json'):
 
 
 def write_error(handler, error):
-    """Writes processing error to response stream.
-
-    """
-    # Reset handler output.
     handler.clear()
 
-    # Set error info to be returned to client.
-    _write(handler, {
+    response = {
         'error_code': ERROR_CODES.get(type(error), 999),
         'error_field': getattr(error, 'field', '--'),
         'error_message': str(error).strip(),
         'error_type': type(error).__name__
-    })
+    }
 
-    # Set response HTTP status code.
+    details = getattr(error, 'details', None)
+    if details:
+        response['error_details'] = details
+
     try:
         handler.set_status(error.response_code)
     except AttributeError:
         handler.set_status(constants.HTTP_RESPONSE_SERVER_ERROR)
+
+    _write(handler, response)
 
 
 def _write_success(handler):

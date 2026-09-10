@@ -43,15 +43,13 @@ class InvalidJSONError(RequestValidationException):
 
 
 class InvalidDatasetIdentifierError(RequestValidationException):
-    """Raised if the submitted issue post data contains an invalid dataset identifer.
-
-    """
-    def __init__(self, project):
-        """Instance constructor.
-
-        """
+    def __init__(self, dataset_id, details=None):
         self.field = constants.JF_DATASETS
-        msg = 'Dataset list contains invalid identifier(s): {}'.format(project)
+        self.details = details or []
+
+        msg = 'Dataset list contains invalid identifier(s): {}'.format(
+            dataset_id
+        )
         super(InvalidDatasetIdentifierError, self).__init__(msg)
 
 
