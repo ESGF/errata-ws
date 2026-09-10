@@ -1,0 +1,27 @@
+data_node: esgf.ipsl.fr
+data_roots:
+  /mnt/tgcc: esg_ipsl
+  /mnt/cnrm/esgf: esg_cnrm
+  /mnt/scality/WCRP: esg_replicas
+set_replica: 'true'
+save_stac: 'true'
+silent: 'false'
+skip_prepare: 'true'
+test: 'true'
+cmor_path: /home/esguser/cmip6-cmor-tables/
+user_project_config:
+  cmip6plus:
+    CONST_ATTR:
+      project: CMIP6Plus
+    pid_prefix: '21.14100'
+cmip6_clone: cmip6plus
+verbose: 'false'
+stac_config:
+  token_storage_file: ~/.esgf-publisher.json
+  stac_transaction_api:
+    client_id: 3da9c21e-2bb9-4576-9054-af420514cb7b
+    device_endpoint: https://aai.egi.eu/auth/realms/egi/protocol/openid-connect/auth/device
+    token_endpoint: https://aai.egi.eu/auth/realms/egi/protocol/openid-connect/token
+    base_url: https://transaction-int.east.esgf.io
+  stac_api: https://discovery-int.east.esgf.io
+https_url: https://esgf.ipsl.fr/fileServer/{}/{}|application/netcdf|HTTPServer

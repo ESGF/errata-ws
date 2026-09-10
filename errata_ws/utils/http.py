@@ -185,7 +185,7 @@ def write_error(handler, error):
     _write(handler, {
         'error_code': ERROR_CODES.get(type(error), 999),
         'error_field': getattr(error, 'field', '--'),
-        'error_message': error.message.strip(),
+        'error_message': str(error).strip(),
         'error_type': type(error).__name__
     })
 
