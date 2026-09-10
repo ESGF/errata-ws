@@ -53,8 +53,8 @@ class ProposeErrataRequestHandler(tornado.web.RequestHandler):
                 if re.search(constants.VERSION_REGEX, dset) is None:
                     raise exceptions.MissingVersionNumber(dset)
 
-            # Exception if esgvoc dataset parsing fails.
-            validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0])
+                # Exception if esgvoc dataset parsing fails.
+                validate_dataset_id(self.request.data[constants.JF_PROJECT], sanitized_datasets[0])
 
 
         def _validate_issue_title():
