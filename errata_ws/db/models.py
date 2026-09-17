@@ -127,12 +127,15 @@ class Issue(Entity):
         """
         def _get_facets():
             result = defaultdict(list)
-
-            for i in facets:
-                if i.issue_uid == self.uid:
-                    result[i.facet_type] = i.facet_value
-
-            return dict(result)
+            for facet in facets:
+                if facet.issue_uid == self.uid:
+                    result[facet.facet_type].append(facet.facet_value)
+            return {
+                facet_type: values[0]
+                if len(values) == 1
+                else sorted(values)
+                for facet_type, values in result.items()
+            }
 
         def _get_reources(resource_type):
             return sorted([i.resource_location for i in resources \

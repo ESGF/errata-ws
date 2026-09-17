@@ -181,15 +181,19 @@ def _get_facets(issue, obj):
             facet.facet_value = getattr(issue, facet_type).lower()
         facets.append(facet)
 
-    # Project specific facets.
-    for collection, term in validate_dataset_id(obj[JF_PROJECT], obj[JF_DATASETS][0])["mapping_used"].items():
+    # Project-specific facets from every affected dataset.
+    facet_values = set()
+    for dataset_id in obj[JF_DATASETS]:
+        mapping = validate_dataset_id(obj[JF_PROJECT], dataset_id)["mapping_used"]
+        for collection, term in mapping.items():
+            facet_values.add((collection, term))
+    for collection, term in sorted(facet_values):
         facet = IssueFacet()
         facet.project = issue.project
         facet.issue_uid = issue.uid
         facet.facet_type = collection
         facet.facet_value = term
         facets.append(facet)
-
     return facets
 
 
