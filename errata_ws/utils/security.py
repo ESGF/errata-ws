@@ -258,6 +258,7 @@ _GH_TEAMS = {
     'cmip7-uaf': 18322094,
     'cmip7-ukncsp': 18322112,
     'cmip7-unsw': 18322101,
+    'cmip7-access-consortium': 20785682,
     'cordex-auth-lhtee': 2567302,
     'cordex-auth-met': 2567303,
     'cordex-awi': 2567304,
